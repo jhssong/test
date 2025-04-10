@@ -1,36 +1,36 @@
-### Related Issues
+### 연관된 이슈
 
 ---
 
-> Please specify the related issue number(s), e.g., #1
+> 관련된 이슈 번호를 적어주세요, 예: #1
 
 <br><br>
 
-### Description
+### 설명
 
 ---
 
-> Briefly describe the changes made in this PR.
+> 이번 PR에서 작업한 내용을 간략히 설명해주세요.
 
 <br><br>
 
-### Checklist
+### 체크리스트
 
 ---
 
-- [ ] Have you tested it in the local environment?
-- [ ] Have you cleaned up unnecessary code? (comments, print statements, etc.)
-- [ ] Have you used commit messages following the convention?
+- [ ] 로컬 환경에서 테스트를 완료하였나요?
+- [ ] 불필요한 코드를 정리하였나요? (주석, print 함수 등)
+- [ ] 커밋 메시지가 컨벤션을 따르고 있나요?
 
 <br><br>
 
-### Screenshots (Optional)
+### 스크린샷 (선택 사항)
 
 ---
 
 <br><br>
 
-### Additional Context (Optional)
+### 추가 정보 (선택 사항)
 
 ---
 
