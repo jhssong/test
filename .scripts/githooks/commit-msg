@@ -1,5 +1,6 @@
 #!/bin/bash
 
+echo "hi?"
 # Type 'chmod +x githooks/commit-msg' to give execution permission
 # Type 'git config core.hooksPath githooks' to make git use this hook
 
