@@ -22,11 +22,16 @@ jobs:
             git show -s --format=%B "$commit" > .git/commit_msg_tmp
 
             echo "Running commit message format check..."
-            bash .script/githooks/commit-msg .git/commit_msg_tmp || {
-              echo "❌ Commit $commit failed the message format check."
+            bash .scripts/githooks/commit-msg .git/commit_msg_tmp || {
+              echo ""
+              echo "❌ Commit failed format check:"
+              echo "   🔸 Commit: $commit"
+              echo "   🔸 Title : \"$title\""
+              echo ""
               exit 1
             }
 
-            echo "✅ Commit $commit passed."
+            echo "✅ Passed: $commit — \"$title\""
+            echo ""
           done
 
