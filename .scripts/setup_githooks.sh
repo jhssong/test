@@ -2,7 +2,7 @@
 
 # move to the git project root no matter where the script is run
 repo_root=$(git rev-parse --show-toplevel)
-hook_path="$repo_root/githooks"
+hook_path="$repo_root/.scripts/githooks"
 
 git config core.hooksPath "$hook_path"
 
