@@ -1,0 +1,32 @@
+name: Commit message format check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  lint-commits:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Fetch full commit history
+        run: git fetch --depth=100
+
+      - name: Check commit messages
+        run: |
+          for commit in $(git log origin/main..HEAD --pretty=format:"%H"); do
+            echo "🔍 Checking commit: $commit"
+            git show -s --format=%B "$commit" > .git/commit_msg_tmp
+
+            echo "Running commit message format check..."
+            bash .script/githooks/commit-msg .git/commit_msg_tmp || {
+              echo "❌ Commit $commit failed the message format check."
+              exit 1
+            }
+
+            echo "✅ Commit $commit passed."
+          done
+
