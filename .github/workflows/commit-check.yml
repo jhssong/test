@@ -1,4 +1,4 @@
-name: Commit message & PR title format check
+name: Commit format check
 
 on:
   pull_request:
