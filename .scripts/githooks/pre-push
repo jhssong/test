@@ -23,6 +23,10 @@ if [[ ! "$branch" =~ $full_pattern ]]; then
   echo "❌ Push rejected: invalid branch name '$branch'"
   echo "✅ Expected format: <type>/${PROJECT_KEY}-<number>-<summary>"
   echo "   Example: feat/${PROJECT_KEY}-123-login-page"
+  echo ""
+  echo "💡 To fix this, you can rename your branch using:"
+  echo "   git branch -m <type>/${PROJECT_KEY}-<number>-<summary>"
+  echo "   (e.g., git branch -m feat/${PROJECT_KEY}-123-your-feature-summary)"
   exit 1
 fi
 
