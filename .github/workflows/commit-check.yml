@@ -86,6 +86,20 @@ jobs:
             title=$(git log -1 --pretty=format:"%s" "$commit")
             echo "🔍 Checking commit: $commit — \"$title\""
 
+            # Standard GitHub merge commit pattern
+            if [[ "$title" =~ ^Merge\ branch\ '.*'\ into\ '.*'$ ]]; then
+              echo "➡️ Skipping standard merge commit: \"$title\""
+              echo ""
+              continue
+            fi
+
+            # GitHub "Merge pull request #" or "Revert " commit patterns
+            if [[ "$title" =~ ^Merge\ pull\ request\ #[0-9]+.* ]]; then
+              echo "➡️ Skipping pull request merge commit: \"$title\""
+              echo ""
+              continue
+            fi
+            
             git show -s --format=%B "$commit" > .git/commit_msg_tmp
 
             echo "Running commit message format check..."
