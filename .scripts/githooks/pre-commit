@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [ -f ".git/MERGE_HEAD" ]; then
+  echo "➡️ Pre-commit hook: Skipping all checks for merge commit in progress."
+  exit 0
+fi
+
+exit 0

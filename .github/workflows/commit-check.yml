@@ -1,4 +1,4 @@
-name: Commit message & PR title format check
+name: Commit format check
 
 on:
   pull_request:
@@ -85,6 +85,24 @@ jobs:
           for commit in $(git log origin/main..HEAD --pretty=format:"%H"); do
             title=$(git log -1 --pretty=format:"%s" "$commit")
             echo "🔍 Checking commit: $commit — \"$title\""
+
+            # Check for standard GitHub merge commit or rebase/squash merge messages
+            # This pattern covers:
+            # - "Merge branch '...' into '...'"
+            # - "Merge <hash> into <branch_name>"
+            # - "Merge pull request #<number> from ..."
+            if [[ "$title" =~ ^Merge\ (branch\ '.*'\ into\ '.*'$|.*into\ [a-zA-Z0-9_-]+$|pull\ request\ #[0-9]+.*) ]]; then
+              echo "➡️ Skipping detected merge commit: \"$title\""
+              echo ""
+              continue # Skip to the next commit
+            fi
+            
+            # Additional check for common revert commits (often system-generated)
+            if [[ "$title" =~ ^Revert\ ".*"$ ]]; then
+              echo "➡️ Skipping revert commit: \"$title\""
+              echo ""
+              continue
+            fi
 
             git show -s --format=%B "$commit" > .git/commit_msg_tmp
 
