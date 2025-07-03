@@ -1,0 +1,104 @@
+name: Commit message & PR title format check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+env:
+  PROJECT_KEY: DAM
+
+jobs:
+  check-branch-name:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branch name format
+        run: |
+          BRANCH_NAME="${{ github.head_ref }}"
+          PROJECT_KEY="${{ env.PROJECT_KEY }}"
+          echo "🔍 Checking branch: $BRANCH_NAME (Project: $PROJECT_KEY)"
+
+          TYPE_PATTERN="(feat|fix|hotfix|build|ci|chore|style|docs|refactor|test)"
+          FULL_PATTERN="^${TYPE_PATTERN}\/${PROJECT_KEY}-[0-9]+-[a-z0-9-]+$"
+
+          if [[ ! "$BRANCH_NAME" =~ $FULL_PATTERN ]]; then
+            echo "❌ Invalid branch name: '$BRANCH_NAME'"
+            echo "✅ Format: <type>/${PROJECT_KEY}-<number>-<summary>"
+            echo "   Example: feat/${PROJECT_KEY}-123-login-page"
+            exit 1
+          fi
+
+          echo "✅ Branch name format is valid."
+
+  lint-commits-and-pr-title:
+    runs-on: ubuntu-latest
+    needs: check-branch-name
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Fetch full commit history
+        run: git fetch --depth=100
+
+      - name: Check PR title includes issue key
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PROJECT_KEY="${{ env.PROJECT_KEY }}"
+          ISSUE_KEY_PREFIX_PATTERN="^\[${PROJECT_KEY}-[0-9]+\] "
+
+          echo "🔍 Checking PR title: \"$PR_TITLE\""
+
+          if ! [[ "$PR_TITLE" =~ $ISSUE_KEY_PREFIX_PATTERN ]]; then
+            echo "❌ PR title does not start with the expected issue key prefix (${PROJECT_KEY}-###)"
+            echo "✅ Expected format: e.g. '[${PROJECT_KEY}-123] feat: Add login form'"
+            exit 1
+          fi
+
+          FORMAT_CHECK_TITLE=$(echo "$PR_TITLE" | sed -E "s/${ISSUE_KEY_PREFIX_PATTERN}//")  
+
+          # Validate that the remaining part is not empty after removing the prefix
+          if [ -z "$FORMAT_CHECK_TITLE" ]; then
+            echo "❌ PR title is empty after removing the issue key prefix. The title must contain a subject."
+            echo "✅ Expected format: e.g. '[${PROJECT_KEY}-123] feat: Add login form'"
+            exit 1
+          fi
+
+          echo "Running PR title format check on: \"$FORMAT_CHECK_TITLE\""
+
+          # Write the cleaned PR title to a temporary file
+          echo "$FORMAT_CHECK_TITLE" > .git/pr_title_tmp
+
+          # Run the commit-msg hook against the cleaned PR title
+          bash .scripts/githooks/commit-msg .git/pr_title_tmp || {
+            echo ""
+            echo "❌ PR title failed format check after removing issue key part:"
+            echo "   🔸 Original Title : \"$PR_TITLE\""
+            echo "   🔸 Part Checked   : \"$FORMAT_CHECK_TITLE\""
+            echo ""
+            exit 1
+          }
+
+          echo "✅ PR title includes valid issue key and passes format check."
+
+      - name: Check commit messages
+        run: |
+          for commit in $(git log origin/main..HEAD --pretty=format:"%H"); do
+            title=$(git log -1 --pretty=format:"%s" "$commit")
+            echo "🔍 Checking commit: $commit — \"$title\""
+
+            git show -s --format=%B "$commit" > .git/commit_msg_tmp
+
+            echo "Running commit message format check..."
+            # Execute the commit-msg hook script. If it fails, print an error and exit.
+            bash .scripts/githooks/commit-msg .git/commit_msg_tmp || {
+              echo ""
+              echo "❌ Commit failed format check:"
+              echo "   🔸 Commit: $commit"
+              echo "   🔸 Title : \"$title\""
+              echo ""
+              exit 1
+            }
+
+            echo "✅ Passed: $commit — \"$title\""
+            echo ""
+          done

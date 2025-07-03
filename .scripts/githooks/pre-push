@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# Configurable project key
+PROJECT_KEY="DAM"
+
+# Get current branch name
+branch=$(git symbolic-ref --short HEAD)
+
+# Allowed types
+type_pattern="(feat|fix|hotfix|build|ci|chore|style|docs|refactor|test)"
+# Full pattern: type/PROJECT_KEY-123-user-register
+full_pattern="^${type_pattern}/${PROJECT_KEY}-[0-9]+-[a-z0-9-]+$"
+
+if [[ ! "$branch" =~ $full_pattern ]]; then
+  echo "❌ Push rejected: invalid branch name '$branch'"
+  echo "✅ Expected format: <type>/${PROJECT_KEY}-<number>-<summary>"
+  echo "   Example: feat/${PROJECT_KEY}-123-login-page"
+  exit 1
+fi
+
+echo "✅ Branch name is valid: '$branch'"
