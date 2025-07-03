@@ -36,8 +36,8 @@ fi
 
 # Title must end with an English letter (no punctuation)
 last_char=${title: -1}
-if [[ ! "$last_char" =~ [a-zA-Z] ]]; then
-  echo "❌ The title must end with an English letter (no punctuation). Found: '$last_char'"
+if [[ ! "$last_char" =~ [a-zA-Z0-9\'\"] ]]; then
+  echo "❌ The title must end with an English letter, number, single quote, or double quote. Found: '$last_char'"
   exit 1
 fi
 
